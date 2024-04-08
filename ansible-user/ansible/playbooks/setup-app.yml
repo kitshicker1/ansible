@@ -1,14 +1,25 @@
-#setup-app.yml
+# setup-app.yml
 
 ---
   - hosts: webservers
     become: true
+
+    vars:
+      path_to_app: "/var/www/html"
+ 
     tasks:
       - name: Upload application file
         copy:
           src: ../index.php
-          dest: /var/www/html
+          dest: "{{ path_to_app }}"
           mode: 0755
+        tags: upload
+
+      - name: Create simple info page
+        copy:
+          dest: "{{ path_to_app }}/info.php"
+          content: "<h1> Info about our webserver {{ ansible_hostname }} Making changes</h1>"
+        tags: create
 
       - name: Configure php.ini file
         lineinfile:
@@ -20,3 +31,4 @@
     handlers:
       - name: restart apache
         service: name=httpd state=restarted
+        
